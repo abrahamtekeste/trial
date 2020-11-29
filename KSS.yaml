@@ -1,0 +1,195 @@
+openapi: 3.0.0
+info:
+  title: Kabbee Stream Service API Definition
+  version: 1.0.0
+  description: This is an API definition and documentation designed by Phoenix team for KSS
+tags:
+  - name: baseline
+  - name: sprint 1
+servers:
+  - url: "http://127.0.0.1:4010"
+paths:
+  # paths for registration process
+  /account:
+    post:
+      tags:
+        - baseline
+      summary: Create an account with all required data fields
+      description: Create a new account with the given personal data of the user, if the identifier( email address) is not being used in KSS.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/account"
+      responses:
+        200:
+          description: "operation succeded"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Account created succesfully
+        400:
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Validation Error
+                  detail:
+                    type: string
+                    example: Invalid input parameter/s
+        409:
+          description: "Email already registered"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: The email address used for account creation is already registered in KSS.
+
+    put:
+      tags:
+        - baseline
+      summary: Update an account
+      description: ""
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                account:
+                  $ref: "#/components/schemas/account"
+              required:
+                - "id"
+
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Profile Updated Succesfully
+
+        400:
+          $ref: "#/components/responses/validationError"
+
+        404:
+          $ref: "#/components/responses/notFound"
+          # to be discussed
+  /account/{email}:
+    get:
+      tags:
+        - baseline
+      description: gets details of a specific person if the email given is valid
+      summary: fetch a specific user using an email
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: prefer
+          in: header
+          schema:
+            type: string
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user"
+
+        400:
+          $ref: "#/components/responses/validationError"
+        404:
+          $ref: "#/components/responses/notFound"
+
+components:
+  schemas:
+    user:
+      type: object
+      properties:
+        id:
+          type: string
+        account:
+          $ref: "#/components/schemas/account"
+    account:
+      type: object
+      properties:
+        fullName:
+          type: string
+        dob:
+          type: string
+          format: date
+        gender:
+          type: string
+          enum:
+            - male
+            - female
+        phone:
+          type: number
+        profileImageURL:
+          type: string
+        wallpaperURL:
+          type: string
+        address:
+          $ref: "#/components/schemas/address"
+        login:
+          $ref: "#/components/schemas/login"
+    address:
+      type: object
+      properties:
+        country:
+          type: string
+        city:
+          type: string
+
+    login:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+  responses:
+    validationError:
+      description: ""
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Validation Error
+              detail:
+                type: string
+                example: Invalid input parameter/s
+    notFound:
+      description: ""
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: User/ profile Not Found
